@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Patients</title>
+</head>
+<body>
+<h2>Patients</h2><br>
+<a href="/">Back</a>
+<table border="1px" width="100">
+  <tr>
+    <th>Id</th>
+    <th>Name</th>
+    <th>Surname</th>
+    <th>Date of Birthday</th>
+    <th>Action</th>
+  </tr>
+  <tr th:each="patient: ${patients}">
+    <td th:text="${patient.id}"></td>
+    <td th:text="${patient.name}"></td>
+    <td th:text="${patient.surname}"></td>
+    <td th:text="${T(com.example.healthcaremanagement.util.DateUtil).formatDate(patient.dateOfBirthday)}"></td>
+    <td><a th:href="@{/patients/remove(id = ${patient.id})}" >Remove</a></td>
+  </tr>
+</table>
+
+<p> <a th:href="@{/patients/create}">Create table</a></p>
+</body>
+</html>
