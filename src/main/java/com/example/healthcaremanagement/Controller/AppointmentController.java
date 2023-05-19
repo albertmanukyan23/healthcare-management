@@ -6,8 +6,10 @@ import com.example.healthcaremanagement.entity.Patient;
 import com.example.healthcaremanagement.repository.AppointmentRepository;
 import com.example.healthcaremanagement.repository.DoctorRepository;
 import com.example.healthcaremanagement.repository.PatientRepository;
+import com.example.healthcaremanagement.security.CurrentUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -49,7 +51,9 @@ public class AppointmentController {
 
     @PostMapping("/create")
     public String createApp(@ModelAttribute Appointment appointment,
+                            @AuthenticationPrincipal CurrentUser user,
                             @RequestParam("date.time") @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") Date date) {
+        appointment.setUser(user.getUser());
         appointment.setDateTime(date);
         appointmentRepository.save(appointment);
         return "redirect:/appointments";

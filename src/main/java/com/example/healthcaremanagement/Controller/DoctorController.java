@@ -2,8 +2,10 @@ package com.example.healthcaremanagement.Controller;
 
 import com.example.healthcaremanagement.entity.Doctor;
 import com.example.healthcaremanagement.repository.DoctorRepository;
+import com.example.healthcaremanagement.security.CurrentUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
