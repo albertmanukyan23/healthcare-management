@@ -3,6 +3,8 @@ package com.example.healthcaremanagement.Controller;
 import com.example.healthcaremanagement.entity.Doctor;
 import com.example.healthcaremanagement.repository.DoctorRepository;
 import com.example.healthcaremanagement.security.CurrentUser;
+import com.example.healthcaremanagement.service.DoctorService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -17,22 +19,19 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/doctors")
+@RequiredArgsConstructor
 public class DoctorController {
-    @Autowired
-    private DoctorRepository doctorRepository;
-    @Value("${hospital.upload.image.path}")
-    private String imageUploadPath;
 
+    private  DoctorService doctorService;
     @GetMapping
     public String doctors(ModelMap modelMap) {
-        List<Doctor> all = doctorRepository.findAll();
-        modelMap.addAttribute("doctors", all);
+        modelMap.addAttribute("doctors", doctorService.findAllDoctors());
         return "doctors";
     }
 
     @GetMapping("/remove")
     public String doctorsRemove(@RequestParam("id") int id) {
-        doctorRepository.deleteById(id);
+        doctorService.deleteDoctorById(id);
         return "redirect:/doctors";
     }
 
@@ -44,13 +43,7 @@ public class DoctorController {
     @PostMapping("/create")
     public String createDoctor(@ModelAttribute Doctor doctor,
                                @RequestParam("image") MultipartFile multipartFile) throws IOException {
-        if (multipartFile != null && !multipartFile.isEmpty()) {
-            String fileName = System.nanoTime() + "_" + multipartFile.getOriginalFilename();
-            File file = new File(imageUploadPath + fileName);
-            multipartFile.transferTo(file);
-            doctor.setProfilePic(fileName);
-        }
-        doctorRepository.save(doctor);
+        doctorService.addDoctor(multipartFile,doctor);
         return "redirect:/doctors";
     }
 }

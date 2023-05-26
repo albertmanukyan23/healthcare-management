@@ -1,13 +1,11 @@
 package com.example.healthcaremanagement.Controller;
 
 import com.example.healthcaremanagement.entity.Appointment;
-import com.example.healthcaremanagement.entity.Doctor;
-import com.example.healthcaremanagement.entity.Patient;
-import com.example.healthcaremanagement.repository.AppointmentRepository;
-import com.example.healthcaremanagement.repository.DoctorRepository;
-import com.example.healthcaremanagement.repository.PatientRepository;
 import com.example.healthcaremanagement.security.CurrentUser;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.healthcaremanagement.service.AppointmentService;
+import com.example.healthcaremanagement.service.DoctorService;
+import com.example.healthcaremanagement.service.PatientService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -19,33 +17,28 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/appointments")
+@RequiredArgsConstructor
 public class AppointmentController {
-    @Autowired
-    private AppointmentRepository appointmentRepository;
-    @Autowired
-    private DoctorRepository doctorRepository;
-    @Autowired
-    private PatientRepository patientRepository;
+    private final AppointmentService appointmentService;
+    private final PatientService patientService;
+    private final DoctorService doctorService;
 
     @GetMapping
     public String appointments(ModelMap modelMap) {
-        List<Appointment> all = appointmentRepository.findAll();
-        modelMap.addAttribute("appointments", all);
+        modelMap.addAttribute("appointments", appointmentService.findAllAppointments());
         return "appointments";
     }
 
     @GetMapping("/remove")
     public String appRemove(@RequestParam("id") int id) {
-        appointmentRepository.deleteById(id);
+        appointmentService.deleteAppointmentById(id);
         return "redirect:/appointments";
     }
 
     @GetMapping("/create")
     public String createApp(ModelMap modelMap) {
-        List<Patient> allPatients = patientRepository.findAll();
-        List<Doctor> allDoctors = doctorRepository.findAll();
-        modelMap.addAttribute("doctors", allDoctors);
-        modelMap.addAttribute("patients", allPatients);
+        modelMap.addAttribute("doctors", doctorService.findAllDoctors());
+        modelMap.addAttribute("patients", patientService.findAllPatients());
         return "createAppointment";
     }
 
@@ -53,9 +46,7 @@ public class AppointmentController {
     public String createApp(@ModelAttribute Appointment appointment,
                             @AuthenticationPrincipal CurrentUser user,
                             @RequestParam("date.time") @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") Date date) {
-        appointment.setUser(user.getUser());
-        appointment.setDateTime(date);
-        appointmentRepository.save(appointment);
+        appointmentService.addAppointment(user.getUser(), date, appointment);
         return "redirect:/appointments";
     }
 

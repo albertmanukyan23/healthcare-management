@@ -3,9 +3,14 @@ package com.example.healthcaremanagement.Controller;
 import com.example.healthcaremanagement.entity.User;
 import com.example.healthcaremanagement.entity.UserType;
 import com.example.healthcaremanagement.repository.UserRepository;
+import com.example.healthcaremanagement.security.CurrentUser;
+import com.example.healthcaremanagement.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,13 +20,10 @@ import java.util.Optional;
 
 @Controller
 @RequestMapping("/user")
+@RequiredArgsConstructor
 public class UserController {
+    private final UserService userService;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private UserRepository userRepository;
 
     @GetMapping("/register")
     public String registerPage() {
@@ -30,15 +32,13 @@ public class UserController {
 
     @PostMapping("/register")
     public String register(@ModelAttribute User user) {
-        Optional<User> userFromDB = userRepository.findByEmail(user.getEmail());
-        if (userFromDB.isEmpty()) {
-            String password = user.getPassword();
-            String encodedPassword = passwordEncoder.encode(password);
-            user.setUserType(UserType.USER);
-            user.setPassword(encodedPassword);
-            userRepository.save(user);
-        }
+        userService.registerUser(user);
         return "redirect:/";
+    }
+    @GetMapping("/admin")
+    public  String admin(@AuthenticationPrincipal CurrentUser currentUser, ModelMap modelMap){
+        modelMap.addAttribute("user",currentUser);
+        return "admin";
     }
 
 }

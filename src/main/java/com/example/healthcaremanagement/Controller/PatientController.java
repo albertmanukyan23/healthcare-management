@@ -4,6 +4,9 @@ import com.example.healthcaremanagement.entity.Doctor;
 import com.example.healthcaremanagement.entity.Patient;
 import com.example.healthcaremanagement.repository.DoctorRepository;
 import com.example.healthcaremanagement.repository.PatientRepository;
+import com.example.healthcaremanagement.service.PatientService;
+import com.example.healthcaremanagement.service.impl.PatientServiceImpl;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
@@ -18,20 +21,18 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/patients")
+@RequiredArgsConstructor
 public class PatientController {
-    @Autowired
-    private PatientRepository patientRepository;
-
+    private  final PatientService patientService;
     @GetMapping
     public String patients(ModelMap modelMap) {
-        List<Patient> all = patientRepository.findAll();
-        modelMap.addAttribute("patients", all);
+        modelMap.addAttribute("patients", patientService.findAllPatients());
         return "patients";
     }
 
     @GetMapping("/remove")
     public String patientRemove(@RequestParam("id") int id) {
-        patientRepository.deleteById(id);
+        patientService.deletePatientById(id);
         return "redirect:/patients";
     }
 
@@ -43,8 +44,7 @@ public class PatientController {
     @PostMapping("/create")
     public String createPatient(@ModelAttribute Patient patient,
                                 @RequestParam("birthdayDate") @DateTimeFormat(pattern = "yyyy-MM-dd") Date birthDate) {
-        patient.setDateOfBirthday(birthDate);
-        patientRepository.save(patient);
+        patientService.addPatient(birthDate, patient);
         return "redirect:/patients";
     }
 }
